@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Kamera Sistemi
+{% endblock %}
+
+{% block navbar %}
+
+    <!-- Home button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" style="padding: 20px;" href="{{ url_for('home') }}">Home <span class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- logout button -->
+    <ul class="navbar-nav mb-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('home') }}">Logout</a>
+        </li>
+    </ul>
+
+{% endblock %}
+
+{% block body %}
+<!-- <link href="{{ url_for('static', filename='css/main.css')}}", rel="stylesheet"> -->
+<br/>
+<div class="container-fluid" style="padding: 10px; color:white;">
+    <h1>Kamera Listesi</h1>
+    <table class="table table-hover table-dark">
+        <thead>
+            <tr>
+                <!-- Your Columns HERE -->
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Your rows inside the table HERE: -->
+            {% for camera in cameras %}
+                <tr>
+                    <td>{{ camera.id }}</td>
+                    <td>{{ camera.name }}</td>
+                    <td>{{ camera.location }}</td>
+                    <td>
+                        <a href="{{ url_for('camera', id=camera.id) }}", class="btn btn-outline btn-info">More Info</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- <ul>
+        <p><a href="{{ url_for('camera', id=1) }}">Kamera</a></p>
+        
+        <p><a href="/camera">Kamera</a></p>
+    </ul> -->
+</div>
+{% endblock %}

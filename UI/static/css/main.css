@@ -1,0 +1,93 @@
+/* body,
+
+
+html {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #212121;
+    color: white
+}
+
+.content {
+    margin: 0 auto;
+    width: 400px;
+}
+
+h1 {
+    color: white;
+}
+
+li {
+    display: inline;
+    margin-right: 10px;
+}
+
+
+table,
+td,
+th {
+    border: 1px solid #aaa;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    height: 30px;
+}
+
+td {
+    text-align: center;
+    padding: 5px;
+}
+
+.form {
+    margin-top: 20px;
+}
+
+#content {
+    width: 10%;
+} */
+
+
+
+
+
+table,
+td,
+th {
+    border: 1px solid #aaa;
+}
+
+table {
+    border-collapse: collapse;
+    width: auto;
+}
+
+th {
+    height: 30px;
+}
+
+td {
+    text-align: center;
+    padding: 5px;
+}
+
+#my_table {
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.button {
+    background-color: #4CAF50;
+    /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}

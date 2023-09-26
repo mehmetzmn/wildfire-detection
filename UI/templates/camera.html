@@ -1,0 +1,52 @@
+{% extends 'home.html' %}
+
+{% block head %}{% endblock %}
+
+{% block body %}
+<link href="{{ url_for('static', filename='css/main.css')}}", rel="stylesheet">
+<br/>
+
+<form method="POST" > <!--action="/send_mail"-->
+    
+    <table id="my_table">
+        <tr>
+            <h2 style="margin: 10px;">Images</h2>
+        </tr>
+
+        {% for image_path in image_paths %}
+        {% if loop.index0 % 4 == 0 %}
+            <tr>
+        {% endif %}
+            <td>
+                <label>
+                    <input type="checkbox" name="selected_images" value="{{ image_path }}" >
+                    Select
+                </label>
+            </td>
+            <td>
+                <div class="image-item", >
+                    <img src="{{ url_for( 'static', filename=image_path) }}" alt="A test image" width="300" height="168">
+                </div>
+            </td>
+            
+        {% if loop.index % 4 == 0 or loop.last %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+    
+    <br>
+    <div class="container-fluid">
+        <label>
+            <input type="checkbox" name="select_all">
+            Select all
+        </label>
+
+        <p>Enter the email you want to send the images.</p>
+        <input type="email" name="email" placeholder="Enter recipient email">
+        <button type="submit" class="button">Submit</button>
+    </div>
+</form>
+
+
+{% endblock %}
