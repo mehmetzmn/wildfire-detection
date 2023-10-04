@@ -18,16 +18,31 @@
         </ul>
     </div>
     
+
+    <!-- Register button -->
+    <ul class="navbar-nav mb-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('register_page') }}">Register</a>
+        </li>
+    </ul>
+
+    <!-- login button -->
+    <ul class="navbar-nav mb-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <a class="nav-link active" href="#">Login</a>
+        </li>
+    </ul>
+    
     <!-- logout button -->
     <ul class="navbar-nav mb-auto mb-2 mb-lg-0">
         <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('home') }}">Logout</a>
+            <a class="nav-link active" href="#">Logout</a>
         </li>
     </ul>
 
 {% endblock %}
 
-{% block body %}
+{% block content %}
 <!-- <link href="{{ url_for('static', filename='css/main.css')}}", rel="stylesheet"> -->
 <br/>
 <div class="container-fluid" style="padding: 10px; color:white;">

@@ -2,7 +2,7 @@ import os
 from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import smtplib
@@ -10,31 +10,91 @@ import ssl
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cameras.db'
+app.config['SECRET_KEY'] = '9ccad4f9bbbba1a4090e3110'
 db = SQLAlchemy(app)
+app.app_context().push() # adding this line to avoid write this "with app.app_context():" line everytime on python shell
 
+"""
+TODO: Decide whether to each user has their own cameras or not.
+      If so, then add a foreign key to the User table.
+
+"""
 
 class User(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(length=30), nullable=False, unique=True)
+    email_address = db.Column(db.String(length=50), nullable=False, unique=True)
     password_hash = db.Column(db.String(length=60), nullable=False)
-    pass
+    cameras = db.relationship('Camera', backref='user', lazy=True)
 
 
 class Camera(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(length=15), nullable=False)
     location = db.Column(db.String(length=15), nullable=False)
+    owner = db.Column(db.Integer(), db.ForeignKey('user.id'))
 
     def __repr__(self):
         return f'Camera {self.name}'
+    
+
+############ Flask Forms ############
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import Length, EqualTo, Email, DataRequired, ValidationError
+
+
+class RegisterForm(FlaskForm):
+    # NOTE: Validate_username function name is important. It is used by FlaskForm to validate the username field.
+    #       FlaskForm will look for a function that starts with "validate_" and ends with the field name.
+
+    def validate_field_uniqueness(self, field_name, field_data):
+        user = User.query.filter_by(**{field_name: field_data}).first()
+        if user: raise ValidationError(f'{field_name.capitalize()} already exists! Please try a different {field_name}')
+
+    def validate_username(self, username_to_check):
+        self.validate_field_uniqueness('username', username_to_check.data)
+
+    def validate_email_address(self, email_address_to_check):
+        self.validate_field_uniqueness('email_address', email_address_to_check.data)
+
+
+    username = StringField(label='Username:', validators=[Length(min=2, max=30), DataRequired()]) # Username
+    email_address = StringField(label='Email:', validators=[Email(), DataRequired()]) # Email
+    password1 = PasswordField(label='Password', validators=[Length(min=6), DataRequired()]) # Password
+    password2 = PasswordField(label='Confirm Password:', validators=[EqualTo('password1'), DataRequired()]) # Confirm Password
+    submit = SubmitField(label='Submit') # Submit
+
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register_page():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user_to_create = User(username=form.username.data,
+                              email_address= form.email_address.data,
+                              password_hash=form.password1.data)
+        db.session.add(user_to_create)
+        db.session.commit()
+        return redirect(url_for('home'))
+    if form.errors != {}: # If there are no errors from the validations
+        for err_msg in form.errors.values():
+            flash(f'There was an error with creating a user: {err_msg}', category='danger')
+    return render_template('register.html', form=form)
+
 
 
 @app.route('/')
 def home():
-    cameras = [
-        {'id': 1, 'name': 'Camera 1', 'location': 'Room 1'},
-        {'id': 2, 'name': 'Camera 2', 'location': 'Room 2'},
-    ]
+    # cameras = [
+    #     {'id': 1, 'name': 'Camera 1', 'location': 'Room 1'},
+    #     {'id': 2, 'name': 'Camera 2', 'location': 'Room 2'},
+    # ]
+
+    # I added manually the cameras to the database,
+    # so I can test the database connection
+    cameras = Camera.query.all()
 
     return render_template('home.html', cameras=cameras, id=id)
 

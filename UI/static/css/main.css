@@ -66,19 +66,6 @@ table {
     width: auto;
 }
 
-th {
-    height: 30px;
-}
-
-td {
-    text-align: center;
-    padding: 5px;
-}
-
-#my_table {
-    margin-top: 20px;
-    margin-left: 20px;
-}
 
 .button {
     background-color: #4CAF50;
@@ -90,4 +77,9 @@ td {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+}
+
+.placeholder-text-color::placeholder {
+    color: #FF0000;
+    /* Replace with your desired placeholder text color */
 }
