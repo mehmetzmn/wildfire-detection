@@ -1,6 +1,17 @@
 {% extends 'base.html' %}
+
 {% block title %}
-Register Page
+    Register Page
+{% endblock %}
+
+
+{% block navbar %}
+        <!-- Register button -->
+        <ul class="navbar-nav mb-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('login_page') }}">Login</a>
+            </li>
+        </ul>
 {% endblock %}
 
 
@@ -27,6 +38,13 @@ Register Page
 
                         {{ form.password2.label() }}
                         {{ form.password2(class="form-control", placeholder="password2", style="background-color: white;") }}
+                        <br>
+
+                        <div class="checkbox mb-3">
+                            <h6>Already have an account?</h6>
+                            <a class="btn btn-sm btn-secondary" href="{{ url_for('login_page') }}">Login</a>
+
+                        </div>
 
                         <br>
                         {{ form.submit(class="btn btn-lg btn-block btn-primary") }}

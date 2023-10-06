@@ -3,15 +3,20 @@ from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, login_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import smtplib
 import ssl
 
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cameras.db'
 app.config['SECRET_KEY'] = '9ccad4f9bbbba1a4090e3110'
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
 app.app_context().push() # adding this line to avoid write this "with app.app_context():" line everytime on python shell
 
 """
@@ -20,12 +25,29 @@ TODO: Decide whether to each user has their own cameras or not.
 
 """
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(length=30), nullable=False, unique=True)
     email_address = db.Column(db.String(length=50), nullable=False, unique=True)
     password_hash = db.Column(db.String(length=60), nullable=False)
     cameras = db.relationship('Camera', backref='user', lazy=True)
+
+    @property
+    def password(self):
+        return self.password
+
+    @password.setter
+    def password(self, plain_text_password):
+        self.password_hash = bcrypt.generate_password_hash(plain_text_password).decode('utf-8')
+
+    def check_password_correction(self, attempted_password):
+        return bcrypt.check_password_hash(self.password_hash, attempted_password)
+
 
 
 class Camera(db.Model):
@@ -67,6 +89,11 @@ class RegisterForm(FlaskForm):
     submit = SubmitField(label='Submit') # Submit
 
 
+class LoginForm(FlaskForm):
+    username = StringField(label='Username:', validators=[DataRequired()])
+    password = PasswordField(label='Password:', validators=[DataRequired()])
+    login= SubmitField(label='Login')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_page():
@@ -74,7 +101,7 @@ def register_page():
     if form.validate_on_submit():
         user_to_create = User(username=form.username.data,
                               email_address= form.email_address.data,
-                              password_hash=form.password1.data)
+                              password=form.password1.data)
         db.session.add(user_to_create)
         db.session.commit()
         return redirect(url_for('home'))
@@ -83,6 +110,21 @@ def register_page():
             flash(f'There was an error with creating a user: {err_msg}', category='danger')
     return render_template('register.html', form=form)
 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login_page():
+    form = LoginForm()
+    if form.validate_on_submit():
+        attempted_user = User.query.filter_by(username=form.username.data).first()
+        if attempted_user and attempted_user.check_password_correction(
+            attempted_password=form.password.data
+            ):
+            login_user(attempted_user)
+            flash(f'Success! You are logged in as: {attempted_user.username}', category='success')
+            return redirect(url_for('home'))
+        else:
+            flash('Username and password are not match! Please try again', category='danger')
+    return render_template('login.html', form=form)
 
 
 @app.route('/')

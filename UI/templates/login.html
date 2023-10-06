@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Login Page
+{% endblock %}
+
+{% block navbar %}
+        <!-- Register button -->
+        <ul class="navbar-nav mb-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('register_page') }}">Register</a>
+            </li>
+        </ul>
+{% endblock %}
+
+
+{% block content %}
+    <body class="text-center">
+        <div class="container" style="color: white;">
+            <div class="row">
+                <div class="col-md-6 mx-auto">
+                    <form method="POST" class="form-signin" style="color: white">
+                        {{ form.hidden_tag() }}
+                        <br>
+                        <h1 class="h3 mb-3 font-weight-normal">
+                            Please Login
+                        </h1>
+                        <br>
+                        {{ form.username.label() }}
+                        {{ form.username(class='form-control', placeholder='Username', style='background-color: white;') }}
+
+                        {{ form.password.label() }}
+                        {{ form.password(class='form-control', placeholder='Password', style='background-color: white;') }}
+                        <br>
+                        <div class="checkbox mb-3">
+                            <h6>Don't have an account?</h6>
+                            <a class="btn btn-sm btn-secondary" href="{{ url_for('register_page') }}">Register</a>
+
+                        </div>
+
+                        <br>
+                        {{ form.login(class='btn bth-lg btn-block btn-primary') }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+{% endblock %}
