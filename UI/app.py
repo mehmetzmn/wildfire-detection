@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, login_user, UserMixin
+from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import smtplib
@@ -17,6 +17,8 @@ app.config['SECRET_KEY'] = '9ccad4f9bbbba1a4090e3110'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
+login_manager.login_view = 'login_page' # redirect to login page if user isn't logged in
+login_manager.login_message_category = 'info'
 app.app_context().push() # adding this line to avoid write this "with app.app_context():" line everytime on python shell
 
 """
@@ -104,7 +106,10 @@ def register_page():
                               password=form.password1.data)
         db.session.add(user_to_create)
         db.session.commit()
+        login_user(user_to_create)
+        flash(f'Account created succesfully! You are now logged in as {user_to_create.username}', category='success')
         return redirect(url_for('home'))
+
     if form.errors != {}: # If there are no errors from the validations
         for err_msg in form.errors.values():
             flash(f'There was an error with creating a user: {err_msg}', category='danger')
@@ -128,6 +133,7 @@ def login_page():
 
 
 @app.route('/')
+@login_required
 def home():
     # cameras = [
     #     {'id': 1, 'name': 'Camera 1', 'location': 'Room 1'},
@@ -211,10 +217,11 @@ def camera(id):
     
 
 
-@app.route('/')
-def logout():
-    # logout user
-    pass
+@app.route('/logout')
+def logout_page():
+    logout_user()
+    flash('You have been logged out!', category='info')
+    return redirect(url_for('login_page'))
 
 
 if __name__ == "__main__":
