@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required
+from flask_login import LoginManager, login_user, UserMixin, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import smtplib
@@ -49,7 +49,6 @@ class User(db.Model, UserMixin):
 
     def check_password_correction(self, attempted_password):
         return bcrypt.check_password_hash(self.password_hash, attempted_password)
-
 
 
 class Camera(db.Model):
@@ -142,7 +141,8 @@ def home():
 
     # I added manually the cameras to the database,
     # so I can test the database connection
-    cameras = Camera.query.all()
+    # cameras = Camera.query.all()
+    cameras = Camera.query.filter_by(owner=current_user.id)
 
     return render_template('home.html', cameras=cameras, id=id)
 

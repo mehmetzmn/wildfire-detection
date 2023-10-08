@@ -26,7 +26,6 @@ def check_camera_id(PATH_OUTPUT: str, folder_name: str = "camera") -> int:
     return extracted_camera_id
 
 
-
 def detect(PATH_MODEL: str, folder_name: str) -> None:
     PATH_IMAGE = input("Enter the path of the image: ")
     PATH_OUTPUT = input("Enter the path of the output image: ")
@@ -57,9 +56,5 @@ def detect(PATH_MODEL: str, folder_name: str) -> None:
             os.rmdir(src_path)
             
             
-
-
-    
-
 detect(PATH_MODEL, "camera")
 # print(check_camera_id("/Users/archosan/Desktop/Python projects/wildfire detection/UI/static/images/camera1"))
