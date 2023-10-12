@@ -7,6 +7,14 @@
 <br/>
 
 <form method="POST" > <!--action="/send_mail"-->
+
+    <label for="start_date">Start Date:</label>
+    <input type="date" name="start_date" id="start_date">
+
+    <label for="end_date">End Date:</label>
+    <input type="date" name="end_date" id ="end_date">
+
+    <button type="submit" class="btn btn-sm btn-secondary" name="filter">Filter</button>
     
     <table id="my_table">
         <tr>
@@ -44,7 +52,7 @@
 
         <p>Enter the email you want to send the images.</p>
         <input type="email" name="email" placeholder="Enter recipient email">
-        <button type="submit" class="button">Submit</button>
+        <button type="submit" class="btn bth-lg btn-block btn-primary" name="submit">Submit</button>
     </div>
 </form>
 

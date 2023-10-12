@@ -9,6 +9,8 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import smtplib
 import ssl
+import re
+import subprocess
 
 
 app = Flask(__name__)
@@ -164,14 +166,88 @@ def camera(id):
                 for image_name in image_names:
                     image_paths.append(os.path.join(camera_path, image_name))
         
+    print(image_paths)
     
     if request.method == 'POST':
+
+        #################### Filtering images with date #######################
+
+
+        ROOT_PATH = "/Users/archosan/Desktop/Python projects/wildfire detection/UI/static/images/"
+
+        def extract_date_from_image_metadata(image_path):
+            exiftoolPATH = "/usr/local/bin/exiftool"
+            process = subprocess.Popen([exiftoolPATH, image_path],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT,
+                                    universal_newlines=True)
+
+            for tag in process.stdout:
+                line = tag.strip().split(':', 1)
+                # searching for 'File Modification Date/Time' tag
+                modification_tag = re.search("Modification", tag)
+                if modification_tag is not None:
+                    date = line[1].strip()[:19]
+                    # print(datetime.strptime(date, '%Y:%m:%d %H:%M:%S'))
+                    return datetime.strptime(date.split(' ')[0], '%Y:%m:%d')
+
+        """
+        NOTE:
+        dates_dict =
+        {
+            'camera1': {'image1': date, ...},
+            'camera2': {'image1': date, ...}
+        }
+
+        """
+        dates_dict={}
+
+        for folder in os.listdir(ROOT_PATH):
+            if folder == ".DS_Store":
+                continue
+            elif folder == "camera1":
+                for img in os.listdir(os.path.join(ROOT_PATH, folder)):
+                    if folder not in dates_dict:
+                        dates_dict[folder] = {}
+                    dates_dict[folder][img] = extract_date_from_image_metadata(os.path.join(ROOT_PATH, folder, img))
+            elif folder == "camera2":
+                for img in os.listdir(os.path.join(ROOT_PATH, folder)):
+                    if folder not in dates_dict:
+                        dates_dict[folder] = {}
+                    dates_dict[folder][img] = extract_date_from_image_metadata(os.path.join(ROOT_PATH, folder, img))
+
+        print(dates_dict)
+
+        if 'filter' in request.form:
+            start_date = request.form.get('start_date')
+            end_date = request.form.get('end_date')
+
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+            images_filtered = []
+
+            for camera in dates_dict:
+                for img in dates_dict[camera]:
+                    if dates_dict[camera][img] >= start_date and dates_dict[camera][img] <= end_date:
+                        # print('true')
+                        # print(camera, img, dates_dict[camera][img])
+                        for image in image_paths:
+                            if image.endswith(img):
+                                images_filtered.append(image)
+            image_paths = images_filtered
+            return render_template('camera.html', id=id, image_paths=image_paths)
+        else:
+            image_paths
+
+        ########################################################################
 
         selected_images = request.form.getlist('selected_images')
         select_all = request.form.get('select_all') == 'on'
 
         if select_all:
             # Select all images if the "Select All" checkbox is checked
+            # selected_images = [image_path for image_path in image_paths] # old
             selected_images = [image_path for image_path in image_paths]
             print(selected_images)
 
@@ -212,6 +288,7 @@ def camera(id):
             return 'Email sent successfully!'
         except Exception as e:
             return 'Error sending email: ' + str(e)
+        
     else:
         return render_template('camera.html', id=id, image_paths=image_paths)
     
