@@ -15,7 +15,7 @@ import shutil
 import cv2
 from ultralytics import YOLO
 
-PATH_MODEL = "/Users/archosan/Desktop/Python projects/wildfire detection/models/runs/detect/train/weights/last.pt"
+PATH_MODEL = "./models/runs/detect/train/weights/last.pt"
 
 def check_camera_id(PATH_OUTPUT: str, folder_name: str = "camera") -> int:
     
@@ -26,35 +26,58 @@ def check_camera_id(PATH_OUTPUT: str, folder_name: str = "camera") -> int:
     return extracted_camera_id
 
 
-def detect(PATH_MODEL: str, folder_name: str) -> None:
+def detect(PATH_MODEL: str) -> None:
     PATH_IMAGE = input("Enter the path of the image: ")
     PATH_OUTPUT = input("Enter the path of the output image: ")
 
     model = YOLO(PATH_MODEL)
     model.to('mps')
 
-    img = cv2.imread(PATH_IMAGE)
+    def image_transform(img_path):
+        print("Image path: ", img_path)
+        img = cv2.imread(img_path)
 
-    width = 1280
-    height = 720
-    dim = (width, height)
+        width = 1280
+        height = 720
+        dim = (width, height)
 
-    img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+        img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+
+        return img
 
     # Run YOLOv8 inference on the frame
-    extracted_camera_id = check_camera_id(PATH_OUTPUT)
-    # model.predict(img, project=f'static/images/{folder_name}{extracted_camera_id}')
-    # model.predict(img, project=PATH_OUTPUT, save=True)
 
-    for path in os.listdir(PATH_OUTPUT):
-        if path == 'predict':
-            src_path = os.path.join(PATH_OUTPUT, path)
-            dst_path = os.path.join(PATH_OUTPUT)
-            if os.listdir(src_path) != []:
-              for file in os.listdir(src_path):
-                  shutil.move(os.path.join(src_path, file), dst_path)
-            os.rmdir(src_path)
+    if os.path.isdir(PATH_IMAGE):
+        for img in os.listdir(PATH_IMAGE):
+            if img == '.DS_Store':
+                continue
+            img_path = os.path.join(PATH_IMAGE, img)
+            img = image_transform(img_path)
+            img_name = os.path.splitext(os.path.basename(img_path))[0]
+            # model.predict(img, project=os.path.join(PATH_OUTPUT, img_name), save=True)
+            model.predict(img, project=PATH_OUTPUT, name=f'{img_name}', save=True, exist_ok=True)
+    else:
+        img = image_transform(PATH_IMAGE)
+        img_name = os.path.splitext(os.path.basename(PATH_IMAGE))[0]
+        # model.predict(img, project=os.path.join(PATH_OUTPUT, img_name), save=True)
+        model.predict(img, project=PATH_OUTPUT, name=f'{img_name}', save=True, exist_ok=True)
+
+
+    for pth in os.listdir(PATH_OUTPUT):
+        if pth == ".DS_Store":
+            continue
+        elif os.path.isdir(os.path.join(PATH_OUTPUT, pth)):
+            for img in os.listdir(os.path.join(PATH_OUTPUT, pth)):
+                if img == ".DS_Store":
+                    continue
+                else:
+                    old_name = os.path.join(PATH_OUTPUT, pth, img)
+                    new_name = os.path.join(PATH_OUTPUT, pth ,pth + '.jpg')
+                    os.rename(old_name, new_name)
+                    shutil.move(new_name, os.path.join(PATH_OUTPUT))
+                    os.rmdir(os.path.join(PATH_OUTPUT, pth))
+
             
             
-detect(PATH_MODEL, "camera")
+detect(PATH_MODEL)
 # print(check_camera_id("/Users/archosan/Desktop/Python projects/wildfire detection/UI/static/images/camera1"))
