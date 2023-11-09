@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request, redirect
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -7,19 +7,20 @@ from datetime import datetime
 # source: https://stackoverflow.com/questions/34122949/working-outside-of-application-context-flask
 
 
-# app = Flask(__name__, template_folder="/Users/archosan/Desktop/Python projects/wildfire detection/templates",
-#                       static_folder="/Users/archosan/Desktop/Python projects/wildfire detection/static")
-                      # solved static files not loading source: https://stackoverflow.com/questions/21668742/flask-static-files-getting-404
+# app = Flask(__name__, template_folder="/Users/user/Desktop/Python projects/wildfire detection/templates",
+#                       static_folder="/Users/user/Desktop/Python projects/wildfire detection/static")
+# solved static files not loading source: https://stackoverflow.com/questions/21668742/flask-static-files-getting-404
 
 app = Flask(__name__)
-                      
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
-    date_created = db.Column(db.DateTime, default = datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -40,7 +41,7 @@ def index():
     else:
         tasks = Todo.query.order_by(Todo.date_created).all()
         return render_template('index.html', tasks=tasks)
-    
+
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -48,17 +49,17 @@ def delete(id):
 
     try:
         db.session.delete(task_to_delete)
-        db.session.commit() 
+        db.session.commit()
         return redirect('/')
     except:
         return 'There was a problem deleting that task'
-    
+
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
     task = Todo.query.get_or_404(id)
 
-    if request.method =='POST':
+    if request.method == 'POST':
         task.content = request.form['content']
 
         try:
@@ -68,7 +69,6 @@ def update(id):
             return 'There was a problem updating the task'
     else:
         return render_template('update.html', task=task)
-
 
 
 if __name__ == '__main__':
