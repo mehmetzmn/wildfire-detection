@@ -17,8 +17,9 @@ from ultralytics import YOLO
 
 PATH_MODEL = "./models/runs/detect/train/weights/last.pt"
 
+
 def check_camera_id(PATH_OUTPUT: str, folder_name: str = "camera") -> int:
-    
+
     extracted_camera_folder_name = PATH_OUTPUT.split("/")[-1]
     folder_name_length = len(folder_name)
     extracted_camera_id = extracted_camera_folder_name[folder_name_length:]
@@ -55,13 +56,14 @@ def detect(PATH_MODEL: str) -> None:
             img = image_transform(img_path)
             img_name = os.path.splitext(os.path.basename(img_path))[0]
             # model.predict(img, project=os.path.join(PATH_OUTPUT, img_name), save=True)
-            model.predict(img, project=PATH_OUTPUT, name=f'{img_name}', save=True, exist_ok=True)
+            model.predict(img, project=PATH_OUTPUT,
+                          name=f'{img_name}', save=True, exist_ok=True)
     else:
         img = image_transform(PATH_IMAGE)
         img_name = os.path.splitext(os.path.basename(PATH_IMAGE))[0]
         # model.predict(img, project=os.path.join(PATH_OUTPUT, img_name), save=True)
-        model.predict(img, project=PATH_OUTPUT, name=f'{img_name}', save=True, exist_ok=True)
-
+        model.predict(img, project=PATH_OUTPUT,
+                      name=f'{img_name}', save=True, exist_ok=True)
 
     for pth in os.listdir(PATH_OUTPUT):
         if pth == ".DS_Store":
@@ -72,12 +74,10 @@ def detect(PATH_MODEL: str) -> None:
                     continue
                 else:
                     old_name = os.path.join(PATH_OUTPUT, pth, img)
-                    new_name = os.path.join(PATH_OUTPUT, pth ,pth + '.jpg')
+                    new_name = os.path.join(PATH_OUTPUT, pth, pth + '.jpg')
                     os.rename(old_name, new_name)
                     shutil.move(new_name, os.path.join(PATH_OUTPUT))
                     os.rmdir(os.path.join(PATH_OUTPUT, pth))
 
-            
-            
+
 detect(PATH_MODEL)
-# print(check_camera_id("/Users/archosan/Desktop/Python projects/wildfire detection/UI/static/images/camera1"))
