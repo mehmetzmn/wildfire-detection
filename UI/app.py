@@ -1,3 +1,4 @@
+# references for the code: https://github.com/jimdevops19/FlaskSeries
 from wtforms.validators import Length, EqualTo, Email, DataRequired, ValidationError
 from wtforms import StringField, PasswordField, SubmitField
 from flask_wtf import FlaskForm
